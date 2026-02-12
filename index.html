@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard – Notícias de Mineração</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { margin:0; font-family:Arial,Helvetica,sans-serif; background:#0f172a; color:#e5e7eb; }
+    header { background:#020617; padding:16px 24px; border-bottom:1px solid #1e293b; }
+    header h1 { margin:0; font-size:22px; color:#38bdf8; }
+
+    .layout { display:grid; grid-template-columns:1fr 360px; gap:16px; padding:24px; }
+    @media (max-width:900px){ .layout{ grid-template-columns:1fr; } }
+
+    .filters { grid-column:1 / -1; display:flex; gap:8px; margin-bottom:8px; }
+    .filters input, .filters button {
+      background:#020617; color:#e5e7eb; border:1px solid #1e293b; border-radius:8px; padding:8px 12px; font-size:14px;
+    }
+    .filters button { cursor:pointer; }
+    .filters button.active { background:#1e293b; color:#7dd3fc; }
+
+    main { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px; }
+
+    aside { background:#020617; border:1px solid #1e293b; border-radius:12px; padding:16px; position:sticky; top:16px; height:fit-content; }
+    aside h2 { margin:0 0 8px 0; font-size:16px; color:#7dd3fc; }
+
+    .trade { border-left:4px solid #22c55e; padding:10px 12px; border-radius:6px; font-size:13px; }
+    .trade.sell { border-left-color:#ef4444; }
+
+    .card { position:relative; background:#020617; border:1px solid #1e293b; border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:8px; }
+    .priority { position:absolute; top:12px; right:12px; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:bold; text-transform:uppercase; }
+    .priority.alta { background:#7f1d1d; color:#fecaca; }
+    .priority.media { background:#92400e; color:#fde68a; }
+    .priority.baixa { background:#064e3b; color:#a7f3d0; }
+
+    .card h3 { margin:0; font-size:16px; color:#7dd3fc; }
+    .card p { font-size:14px; color:#cbd5f5; }
+    .card a { margin-top:auto; font-size:13px; color:#38bdf8; text-decoration:none; }
+
+    footer { padding:12px; text-align:center; font-size:12px; color:#94a3b8; border-top:1px solid #1e293b; }
+  </style>
+</head>
+<body>
+<header><h1>Dashboard – Notícias de Mineração</h1></header>
+
+<div class="layout">
+
+  <!-- FILTROS -->
+  <div class="filters">
+    <input id="searchInput" placeholder="Pesquisar notícias…" />
+    <button data-topic="">Todas</button>
+    <button data-topic="ouro">Ouro</button>
+    <button data-topic="prata">Prata</button>
+    <button data-topic="ferro">Ferro</button>
+    <button data-topic="terras raras">Terras Raras</button>
+  </div>
+
+  <main id="news"></main>
+
+  <aside>
+    <h2>Compra & Venda</h2>
+    <div id="trades"></div>
+  </aside>
+</div>
+
+<footer>
+  <span id="lastUpdate">Última atualização: --:--</span> · Atualização automática a cada 10 minutos · Fonte: Google Notícias
+  <div style="margin-top:6px; font-size:10px; color:#64748b;">Marcos Moura – Comercial MDGEO</div>
+</footer>
+
+<script>
+const feeds = [
+  "https://news.google.com/rss/search?q=minera%C3%A7%C3%A3o+Brasil&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+  "https://news.google.com/rss/search?q=ouro+minera%C3%A7%C3%A3o&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+  "https://news.google.com/rss/search?q=ferro+minera%C3%A7%C3%A3o&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+  "https://news.google.com/rss/search?q=terras+raras+minera%C3%A7%C3%A3o&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+];
+
+const newsContainer = document.getElementById("news");
+const searchInput = document.getElementById("searchInput");
+let cachedNews = [];
+let activeTopic = "";
+
+function classify(title){
+  title = title.toLowerCase();
+  if (/aquisi|compra|venda|fus|desinvestimento/.test(title)) return "alta";
+  if (/licen|ibama|anmm|ambiental|processo/.test(title)) return "media";
+  return "baixa";
+}
+
+function renderNews(list){
+  newsContainer.innerHTML = "";
+  list.forEach(item => {
+    const p = classify(item.title);
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <span class="priority ${p}">${p}</span>
+      <h3>${item.title}</h3>
+      <p>${(item.description||"").replace(/<[^>]*>/g,"").slice(0,200)}...</p>
+      <a href="${item.link}" target="_blank">Ler notícia</a>`;
+    newsContainer.appendChild(card);
+  });
+}
+
+async function loadNews(){
+  let all = [];
+  for(const rss of feeds){
+    const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}`;
+    const res = await fetch(api); const data = await res.json();
+    if(data.items) all = all.concat(data.items);
+  }
+  cachedNews = all;
+  applyFilters();
+}
+
+function applyFilters(){
+  let list = cachedNews;
+  const q = searchInput.value.toLowerCase();
+  if(q) list = list.filter(n => n.title.toLowerCase().includes(q) || (n.description||"").toLowerCase().includes(q));
+  if(activeTopic) list = list.filter(n => n.title.toLowerCase().includes(activeTopic));
+  renderNews(list.slice(0,30));
+}
+
+searchInput.addEventListener("input", applyFilters);
+
+document.querySelectorAll(".filters button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filters button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    activeTopic = btn.dataset.topic;
+    applyFilters();
+  });
+});
+
+const tradeFeeds = [
+  "https://news.google.com/rss/search?q=aquisi%C3%A7%C3%A3o+mineradora&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+  "https://news.google.com/rss/search?q=venda+ativo+minera%C3%A7%C3%A3o&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+];
+
+const tradesContainer = document.getElementById("trades");
+async function loadTrades(){
+  tradesContainer.innerHTML="";
+  let all=[];
+  for(const rss of tradeFeeds){
+    const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}`;
+    const res = await fetch(api); const data = await res.json();
+    if(data.items) all = all.concat(data.items);
+  }
+  all.slice(0,10).forEach(item => {
+    const div = document.createElement("div");
+    div.className = `trade ${/venda|desinvestimento/i.test(item.title)?"sell":""}`;
+    div.innerHTML = `<strong>${item.title}</strong>`;
+    tradesContainer.appendChild(div);
+  });
+}
+
+loadNews();
+loadTrades();
+updateLastUpdate();
+function updateLastUpdate(){
+  const el = document.getElementById("lastUpdate");
+  const d = new Date();
+  el.textContent = `Última atualização: ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+}
+
+updateLastUpdate();
+
+setInterval(()=>{loadNews();loadTrades();},10*60*1000);
+</script>
+</body>
+</html>
