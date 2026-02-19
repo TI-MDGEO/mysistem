@@ -5,36 +5,124 @@
   <title>MDGEO - Notícias de Mineração</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Arial, sans-serif;
+    :root {
+      --primary: #3498db;
+      --secondary: #2c3e50;
+      --bg: #f5f5f5;
+      --card-bg: #ffffff;
+      --text: #2c3e50;
+      --text-light: #7f8c8d;
+      --border: #dee2e6;
+      --success: #2ecc71;
+      --warning: #f39c12;
+      --danger: #e74c3c;
     }
 
-    body {
-      background-color: #f5f5f5;
-      color: #2c3e50;
-      line-height: 1.5;
+    body.dark-mode {
+      --bg: #1a1a1a;
+      --card-bg: #2d2d2d;
+      --text: #ecf0f1;
+      --text-light: #bdc3c7;
+      --border: #404040;
     }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; transition: background 0.3s, color 0.3s; }
+
+    body { 
+      background-color: var(--bg); 
+      color: var(--text); 
+      line-height: 1.5; 
+      padding-top: 180px; 
+    }
+
+    @media (max-width: 650px) { body { padding-top: 240px; } }
 
     header {
-      background: white;
-      padding: 18px 24px;
-      border-bottom: 2px solid #3498db;
+      background: var(--card-bg);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .header-top {
+      padding: 10px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border-bottom: 1px solid var(--border);
     }
 
-    header h1 {
-      margin: 0;
-      font-size: 22px;
-      font-weight: 600;
-      color: #2c3e50;
+    header h1 { font-size: 20px; font-weight: 600; color: var(--text); }
+
+    .header-controls { display: flex; gap: 15px; align-items: center; }
+
+    .btn-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      padding: 6px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.1rem;
     }
+
+    .access-counter {
+      background: var(--primary);
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 4px 12px;
+      border-radius: 40px;
+      margin-right: 10px;
+      white-space: nowrap;
+    }
+
+    .filters-container {
+      padding: 10px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--card-bg);
+    }
+
+    .filters-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filters input {
+      flex: 1;
+      min-width: 200px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: 8px 16px;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+    }
+
+    .filters button {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 15px;
+      border-radius: 40px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .filters button.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+    .date-filters button { border-color: var(--primary); color: var(--primary); }
+    .date-filters button.active { background: var(--primary); color: white; }
 
     .layout {
       display: grid;
@@ -45,86 +133,24 @@
       margin: 0 auto;
     }
 
-    @media (max-width:900px) {
-      .layout { grid-template-columns: 1fr; }
-    }
+    @media (max-width:950px) { .layout { grid-template-columns: 1fr; } }
 
-    /* === FILTROS (ESTILO MDGEO) === */
-    .filters {
-      grid-column: 1 / -1;
-      display: flex;
-      gap: 12px;
-      margin-bottom: 8px;
-      background: white;
-      padding: 16px 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .filters input {
-      flex: 1 1 240px;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 40px;
-      padding: 10px 16px;
-      font-size: 14px;
-      color: #2c3e50;
-      outline: none;
-      transition: 0.1s;
-    }
-
-    .filters input:focus {
-      border-color: #3498db;
-      box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
-    }
-
-    .filters button {
-      background: white;
-      border: 1px solid #ddd;
-      color: #2c3e50;
-      padding: 8px 20px;
-      border-radius: 40px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .filters button.active {
-      background: #3498db;
-      border-color: #3498db;
-      color: white;
-    }
-
-    .filters button:hover:not(.active) {
-      background: #ecf0f1;
-    }
-
-    /* === GRADE DE NOTÍCIAS === */
     main {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 24px;
     }
 
     .card {
-      position: relative;
-      background: white;
+      background: var(--card-bg);
       border-radius: 10px;
       padding: 20px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      border-left: 5px solid #3498db;
+      border-left: 5px solid var(--primary);
       display: flex;
       flex-direction: column;
       gap: 12px;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      position: relative;
     }
 
     .priority {
@@ -133,265 +159,277 @@
       right: 16px;
       padding: 4px 14px;
       border-radius: 30px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
       color: white;
     }
+    .p-alta { background: var(--danger); }
+    .p-media { background: var(--warning); }
+    .p-baixa { background: var(--success); }
 
-    .priority.alta {
-      background: #e74c3c;
-    }
+    .card h3 { font-size: 16px; padding-right: 70px; color: var(--text); line-height: 1.3; }
+    .card p { font-size: 13px; color: var(--text-light); }
+    .card-date { font-size: 11px; color: var(--primary); font-weight: bold; }
 
-    .priority.media {
-      background: #f39c12;
-    }
-
-    .priority.baixa {
-      background: #2ecc71;
-    }
-
-    .card h3 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 600;
-      color: #2c3e50;
-      line-height: 1.4;
-      padding-right: 80px;
-    }
-
-    .card p {
-      font-size: 13px;
-      color: #7f8c8d;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      margin: 0;
-    }
-
-    .card a {
-      margin-top: 4px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #3498db;
-      text-decoration: none;
+    .card-footer {
       display: flex;
+      justify-content: flex-start;
       align-items: center;
-      gap: 4px;
-      align-self: flex-start;
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
     }
+    .card a { color: var(--primary); text-decoration: none; font-weight: 600; font-size: 13px; }
 
-    .card a:hover {
-      color: #2980b9;
-      text-decoration: underline;
-    }
-
-    /* === PAINEL LATERAL (COMPRA & VENDA) === */
     aside {
-      background: white;
+      background: var(--card-bg);
       border-radius: 10px;
       padding: 20px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      border-left: 5px solid #2c3e50;
-      position: sticky;
-      top: 24px;
+      border-left: 5px solid var(--secondary);
       height: fit-content;
     }
 
-    aside h2 {
-      margin: 0 0 16px 0;
-      font-size: 18px;
-      font-weight: 600;
-      color: #2c3e50;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-bottom: 1px solid #ecf0f1;
-      padding-bottom: 12px;
-    }
-
-    #trades {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .trade {
-      border-left: 4px solid #2ecc71;
-      background: #f8f9fa;
-      padding: 14px 16px;
+    .trade-item {
+      border-left: 4px solid var(--success);
+      background: var(--bg);
+      padding: 12px;
       border-radius: 8px;
+      margin-bottom: 10px;
       font-size: 13px;
-      line-height: 1.4;
-      transition: background 0.2s;
+      cursor: pointer;
     }
+    .trade-item:hover { background: var(--border); }
+    .trade-item.sell { border-left-color: var(--danger); }
 
-    .trade.sell {
-      border-left-color: #e74c3c;
-    }
-
-    .trade:hover {
-      background: #ecf0f1;
-    }
-
-    .trade strong {
-      font-weight: 600;
-      color: #2c3e50;
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    /* === FOOTER === */
     footer {
-      padding: 20px 24px;
+      padding: 20px;
       text-align: center;
       font-size: 12px;
-      color: #7f8c8d;
-      border-top: 1px solid #ecf0f1;
-      background: white;
+      color: var(--text-light);
+      background: var(--card-bg);
       margin-top: 24px;
-    }
-
-    footer div {
-      color: #95a5a6;
+      border-top: 1px solid var(--border);
     }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>📰 Dashboard – Notícias de Mineração</h1>
-  <!-- Apenas o título, sem ícones extras, sem "sair", sem "Olá Marcos" -->
+  <div class="header-top">
+    <h1>📰 Dashboard – Notícias de Mineração</h1>
+    <div class="header-controls">
+      <span id="accessCounter" class="access-counter">Acessos: ...</span>
+      <button class="btn-toggle" onclick="toggleDarkMode()">🌓</button>
+    </div>
+  </div>
+  
+  <div class="filters-container">
+    <div class="filters-row filters" id="topicFilters">
+      <input id="searchInput" placeholder="Pesquisar notícias..." />
+      <button data-topic="" class="topic-btn active">Todas</button>
+      <button data-topic="ouro" class="topic-btn">Ouro</button>
+      <button data-topic="prata" class="topic-btn">Prata</button>
+      <button data-topic="ferro" class="topic-btn">Ferro</button>
+      <button data-topic="terras raras" class="topic-btn">Terras Raras</button>
+    </div>
+    <div class="filters-row filters date-filters">
+      <span style="font-size: 12px; font-weight: bold;">Período:</span>
+      <button data-days="0" class="date-btn active">Sempre</button>
+      <button data-days="1" class="date-btn">Hoje</button>
+      <button data-days="7" class="date-btn">Esta Semana</button>
+    </div>
+  </div>
 </header>
 
 <div class="layout">
-
-  <!-- FILTROS (MESMA ESTRUTURA ORIGINAL) -->
-  <div class="filters">
-    <input id="searchInput" placeholder="Pesquisar notícias…" />
-    <button data-topic="" class="active">Todas</button>
-    <button data-topic="ouro">Ouro</button>
-    <button data-topic="prata">Prata</button>
-    <button data-topic="ferro">Ferro</button>
-    <button data-topic="terras raras">Terras Raras</button>
-  </div>
-
-  <!-- GRADE DE NOTÍCIAS -->
-  <main id="news"></main>
-
-  <!-- PAINEL COMPRA & VENDA -->
+  <main id="news">Buscando as últimas notícias...</main>
   <aside>
     <h2>🔄 Compra & Venda</h2>
-    <div id="trades"></div>
+    <div id="trades">Carregando mercado...</div>
   </aside>
-
 </div>
 
 <footer>
-  <span id="lastUpdate">Última atualização: --:--</span> · Atualização automática a cada 10 minutos · Fonte: Google Notícias
+  <span id="lastUpdate">Última atualização: --:--</span>
   <div style="margin-top:6px; font-size:10px;">Marcos Moura – Comercial MDGEO</div>
 </footer>
 
 <script>
-const feeds = [
-  "https://news.google.com/rss/search?q=minera%C3%A7%C3%A3o+Brasil&hl=pt-BR&gl=BR&ceid=BR:pt-419",
-  "https://news.google.com/rss/search?q=ouro+minera%C3%A7%C3%A3o&hl=pt-BR&gl=BR&ceid=BR:pt-419",
-  "https://news.google.com/rss/search?q=ferro+minera%C3%A7%C3%A3o&hl=pt-BR&gl=BR&ceid=BR:pt-419",
-  "https://news.google.com/rss/search?q=terras+raras+minera%C3%A7%C3%A3o&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+const newsFeeds = [
+  "https://news.google.com/rss/search?q=mineração+Brasil&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+  "https://news.google.com/rss/search?q=geologia+mineração&hl=pt-BR&gl=BR&ceid=BR:pt-419"
 ];
 
-const newsContainer = document.getElementById("news");
-const searchInput = document.getElementById("searchInput");
-let cachedNews = [];
-let activeTopic = "";
+const tradeFeeds = [
+  "https://news.google.com/rss/search?q=aquisição+mineradora+Brasil&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+  "https://news.google.com/rss/search?q=venda+ativo+mineração&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+];
 
-function classify(title){
-  title = title.toLowerCase();
-  if (/aquisi|compra|venda|fus|desinvestimento/.test(title)) return "alta";
-  if (/licen|ibama|anmm|ambiental|processo/.test(title)) return "media";
-  return "baixa";
+let cachedNews = JSON.parse(localStorage.getItem('mdgeo_news_cache')) || [];
+let activeTopic = "";
+let activeDays = 0;
+
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('mdgeo_dark', document.body.classList.contains('dark-mode'));
 }
 
-function renderNews(list){
-  newsContainer.innerHTML = "";
+function classify(title) {
+  const t = title.toLowerCase();
+  if (/(aquisi|compra|venda|fus|investimento|barragem|rompimento|bilhões)/.test(t)) return {l: "alta", c: "p-alta"};
+  if (/(licença|ibama|anm|ambiental|justiça|leilão)/.test(t)) return {l: "media", c: "p-media"};
+  return {l: "baixa", c: "p-baixa"};
+}
+
+function renderNews(list) {
+  const container = document.getElementById("news");
+  container.innerHTML = list.length ? "" : "<p>Nenhuma notícia encontrada com estes filtros.</p>";
+  
   list.forEach(item => {
     const p = classify(item.title);
+    const dateObj = new Date(item.pubDate);
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
-      <span class="priority ${p}">${p}</span>
+      <span class="priority ${p.c}">${p.l}</span>
+      <span class="card-date">${dateObj.toLocaleDateString('pt-BR')}</span>
       <h3>${item.title}</h3>
-      <p>${(item.description||"").replace(/<[^>]*>/g,"").slice(0,200)}...</p>
-      <a href="${item.link}" target="_blank">Ler notícia →</a>`;
-    newsContainer.appendChild(card);
+      <p>${(item.description || "").replace(/<[^>]*>/g, "").slice(0, 150)}...</p>
+      <div class="card-footer">
+        <a href="${item.link}" target="_blank">Ler notícia →</a>
+      </div>`;
+    container.appendChild(card);
   });
 }
 
-async function loadNews(){
-  let all = [];
-  for(const rss of feeds){
-    const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}`;
-    const res = await fetch(api); const data = await res.json();
-    if(data.items) all = all.concat(data.items);
+async function fetchData(urls) {
+  let allItems = [];
+  for (const url of urls) {
+    try {
+      const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
+      const res = await fetch(api);
+      const data = await res.json();
+      if (data && data.items) allItems = allItems.concat(data.items);
+    } catch (e) { console.error("Erro ao buscar feed:", e); }
   }
-  cachedNews = all;
+  return allItems;
+}
+
+async function loadAll() {
+  const news = await fetchData(newsFeeds);
+  if (news.length > 0) {
+    cachedNews = news.filter((v, i, a) => a.findIndex(t => (t.title === v.title)) === i);
+    localStorage.setItem('mdgeo_news_cache', JSON.stringify(cachedNews)); 
+  }
   applyFilters();
+
+  const trades = await fetchData(tradeFeeds);
+  const tradesContainer = document.getElementById("trades");
+  tradesContainer.innerHTML = "";
+  if(trades.length === 0) tradesContainer.innerHTML = "<p>Sem movimentações recentes.</p>";
+  
+  trades.slice(0, 12).forEach(item => {
+    const isSell = /venda|desinvestimento|alienação/i.test(item.title);
+    const div = document.createElement("div");
+    div.className = `trade-item ${isSell ? "sell" : ""}`;
+    div.onclick = () => window.open(item.link, '_blank');
+    div.innerHTML = `<strong>${item.title}</strong>`;
+    tradesContainer.appendChild(div);
+  });
+
+  const d = new Date();
+  document.getElementById("lastUpdate").textContent = `Última atualização: ${d.toLocaleTimeString('pt-BR')}`;
 }
 
-function applyFilters(){
-  let list = cachedNews;
-  const q = searchInput.value.toLowerCase();
-  if(q) list = list.filter(n => n.title.toLowerCase().includes(q) || (n.description||"").toLowerCase().includes(q));
-  if(activeTopic) list = list.filter(n => n.title.toLowerCase().includes(activeTopic));
-  renderNews(list.slice(0,30));
+function applyFilters() {
+  const q = document.getElementById("searchInput").value.toLowerCase();
+  let filtered = [...cachedNews];
+
+  if (activeTopic) {
+    filtered = filtered.filter(n => n.title.toLowerCase().includes(activeTopic));
+  }
+  
+  if (q) {
+    filtered = filtered.filter(n => 
+      n.title.toLowerCase().includes(q) || 
+      (n.description || "").toLowerCase().includes(q)
+    );
+  }
+  
+  if (activeDays > 0) {
+    const now = new Date();
+    filtered = filtered.filter(n => {
+      const pubDate = new Date(n.pubDate);
+      const diffDays = Math.abs(now - pubDate) / (1000 * 60 * 60 * 24);
+      return diffDays <= activeDays;
+    });
+  }
+
+  renderNews(filtered.slice(0, 40));
 }
 
-searchInput.addEventListener("input", applyFilters);
+// Event Listeners
+document.getElementById("searchInput").addEventListener("input", applyFilters);
 
-document.querySelectorAll(".filters button").forEach(btn => {
+document.querySelectorAll(".topic-btn").forEach(btn => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll(".filters button").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".topic-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     activeTopic = btn.dataset.topic;
     applyFilters();
   });
 });
 
-const tradeFeeds = [
-  "https://news.google.com/rss/search?q=aquisi%C3%A7%C3%A3o+mineradora&hl=pt-BR&gl=BR&ceid=BR:pt-419",
-  "https://news.google.com/rss/search?q=venda+ativo+minera%C3%A7%C3%A3o&hl=pt-BR&gl=BR&ceid=BR:pt-419"
-];
-
-const tradesContainer = document.getElementById("trades");
-async function loadTrades(){
-  tradesContainer.innerHTML="";
-  let all=[];
-  for(const rss of tradeFeeds){
-    const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}`;
-    const res = await fetch(api); const data = await res.json();
-    if(data.items) all = all.concat(data.items);
-  }
-  all.slice(0,10).forEach(item => {
-    const div = document.createElement("div");
-    div.className = `trade ${/venda|desinvestimento/i.test(item.title)?"sell":""}`;
-    div.innerHTML = `<strong>${item.title}</strong>`;
-    tradesContainer.appendChild(div);
+document.querySelectorAll(".date-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".date-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    activeDays = parseInt(btn.dataset.days);
+    applyFilters();
   });
+});
+
+// --- NOVO: Contador global com CountAPI ---
+async function updateGlobalCounter() {
+  const NAMESPACE = "mdgeo";        // você pode alterar para um nome único
+  const KEY = "acessos";            // chave do contador
+  const counterElement = document.getElementById('accessCounter');
+  
+  try {
+    // Incrementa e obtém o novo valor
+    const response = await fetch(`https://api.countapi.xyz/hit/${NAMESPACE}/${KEY}`);
+    const data = await response.json();
+    if (data.value !== undefined) {
+      counterElement.textContent = `Acessos: ${data.value}`;
+    } else {
+      throw new Error('Resposta inválida da API');
+    }
+  } catch (error) {
+    console.error('Erro ao acessar CountAPI, usando fallback localStorage:', error);
+    // Fallback: contador local (apenas para não quebrar)
+    let localCount = localStorage.getItem('mdgeo_fallback_count') || 0;
+    localCount = parseInt(localCount) + 1;
+    localStorage.setItem('mdgeo_fallback_count', localCount);
+    counterElement.textContent = `Acessos: ${localCount} (local)`;
+  }
 }
 
-loadNews();
-loadTrades();
-updateLastUpdate();
-function updateLastUpdate(){
-  const el = document.getElementById("lastUpdate");
-  const d = new Date();
-  el.textContent = `Última atualização: ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
-}
+// Inicialização
+document.addEventListener("DOMContentLoaded", () => {
+  updateGlobalCounter(); // atualiza o contador global
 
-updateLastUpdate();
-setInterval(()=>{loadNews();loadTrades();},10*60*1000);
+  if (localStorage.getItem('mdgeo_dark') === 'true') document.body.classList.add('dark-mode');
+  
+  if (cachedNews.length > 0) {
+    applyFilters();
+    document.getElementById("lastUpdate").textContent = `Cache carregado: ${new Date().toLocaleTimeString('pt-BR')}`;
+  }
+
+  loadAll();
+  setInterval(loadAll, 5 * 60 * 1000); 
+});
 </script>
 
 </body>
